@@ -22,6 +22,9 @@ export const authenticateToken = async (
   throw new AppError('JWT authentication deprecated - use Firebase authentication', 401, 'DEPRECATED_AUTH');
 };
 
+// Alias for compatibility
+export const protect = authenticateToken;
+
 // JWT authentication removed - using Firebase authentication only
 export const optionalAuth = async (
   req: AuthenticatedRequest,

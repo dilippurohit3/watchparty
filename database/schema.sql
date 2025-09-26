@@ -33,7 +33,7 @@ CREATE TABLE rooms (
     room_code VARCHAR(10) UNIQUE NOT NULL,
     current_video_id UUID,
     is_playing BOOLEAN DEFAULT FALSE,
-    current_time DECIMAL(10,3) DEFAULT 0,
+    current_video_time DECIMAL(10,3) DEFAULT 0,
     playback_rate DECIMAL(3,2) DEFAULT 1.0 CHECK (playback_rate >= 0.25 AND playback_rate <= 4.0),
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()

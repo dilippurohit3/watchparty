@@ -15,7 +15,7 @@ export const connectRedis = async (config: RedisConfig): Promise<void> => {
       host: config.host,
       port: config.port,
       password: config.password,
-      retryDelayOnFailover: 100,
+      retryDelayOnClusterDown: 100,
       enableReadyCheck: false,
       maxRetriesPerRequest: null,
     });

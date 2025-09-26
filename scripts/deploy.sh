@@ -74,13 +74,19 @@ echo "🗄️ Configuring PostgreSQL..."
 sudo -u postgres psql -c "CREATE DATABASE boltzy_production;"
 sudo -u postgres psql -c "CREATE USER boltzy_user WITH PASSWORD 'boltzy_secure_password_2024';"
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE boltzy_production TO boltzy_user;"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON SCHEMA public TO boltzy_user;"
 sudo -u postgres psql -c "ALTER USER boltzy_user CREATEDB;"
 
 # Configure Redis
 echo "🗄️ Configuring Redis..."
+sudo sed -i 's/# bind 127.0.0.1/bind 127.0.0.1/' /etc/redis/redis.conf
 sudo sed -i 's/# maxmemory <bytes>/maxmemory 512mb/' /etc/redis/redis.conf
 sudo sed -i 's/# maxmemory-policy noeviction/maxmemory-policy allkeys-lru/' /etc/redis/redis.conf
 sudo systemctl restart redis-server
+
+# Test Redis configuration
+echo "🧪 Testing Redis configuration..."
+redis-cli ping
 
 # Create application directory
 echo "📁 Creating application directory..."
@@ -108,6 +114,10 @@ chmod 755 uploads
 # Run database schema
 echo "🗄️ Setting up database schema..."
 psql -h localhost -U boltzy_user -d boltzy_production -f database/schema.sql
+
+# Verify tables were created
+echo "✅ Verifying database schema..."
+psql -h localhost -U boltzy_user -d boltzy_production -c "\dt"
 
 echo ""
 echo "🎉 Initial setup complete!"

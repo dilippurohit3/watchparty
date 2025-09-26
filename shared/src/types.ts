@@ -342,11 +342,6 @@ export interface AppConfig {
     port: number;
     password?: string;
   };
-  jwt: {
-    secret: string;
-    expiresIn: string;
-    refreshExpiresIn: string;
-  };
   upload: {
     maxFileSize: number;
     allowedTypes: string[];

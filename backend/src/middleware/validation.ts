@@ -21,3 +21,6 @@ export const validateRequest = (
   
   next();
 };
+
+// Alias for compatibility
+export const validate = validateRequest;

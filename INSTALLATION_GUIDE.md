@@ -399,23 +399,130 @@ ALTER USER boltzy_user CREATEDB;
 
 ### Step 5.2: Configure Redis
 
+> **💡 OPTION 1: Automated Configuration (Recommended for Beginners)**
 ```bash
-# Edit Redis configuration
-sudo vim /etc/redis/redis.conf
-
-# Find and modify these lines:
-bind 127.0.0.1
-maxmemory 512mb
-maxmemory-policy allkeys-lru
-save 900 1
-save 300 10
-save 60 10000
+# Automatically configure Redis with optimal settings
+sudo sed -i 's/# bind 127.0.0.1/bind 127.0.0.1/' /etc/redis/redis.conf
+sudo sed -i 's/# maxmemory <bytes>/maxmemory 512mb/' /etc/redis/redis.conf
+sudo sed -i 's/# maxmemory-policy noeviction/maxmemory-policy allkeys-lru/' /etc/redis/redis.conf
 
 # Restart Redis
 sudo systemctl restart redis-server
+
+# Test Redis configuration
+redis-cli ping
+# Should return: PONG
 ```
 
-### Step 5.3: Create Admin User in Database
+> **💡 OPTION 2: Manual Configuration (Advanced Users)**
+```bash
+# Edit Redis configuration (use nano for beginners)
+sudo nano /etc/redis/redis.conf
+
+# Find and modify these lines:
+# 1. Find: # bind 127.0.0.1
+#    Change to: bind 127.0.0.1
+
+# 2. Find: # maxmemory <bytes>
+#    Change to: maxmemory 512mb
+
+# 3. Find: # maxmemory-policy noeviction
+#    Change to: maxmemory-policy allkeys-lru
+
+# 4. Find: save 900 1
+#    Make sure it's: save 900 1
+
+# 5. Find: save 300 10
+#    Make sure it's: save 300 10
+
+# 6. Find: save 60 10000
+#    Make sure it's: save 60 10000
+
+# Save and exit (Ctrl + X, then Y, then Enter)
+
+# Restart Redis
+sudo systemctl restart redis-server
+
+# Test Redis configuration
+redis-cli ping
+# Should return: PONG
+```
+
+> **🎯 For beginners: Use Option 1 (Automated Configuration) - it handles everything automatically!**
+
+### Step 5.3: Apply Database Schema
+
+> **🚨 IMPORTANT: You must apply the database schema BEFORE creating users!**
+
+> **💡 Make sure you're in the correct directory with the repository cloned!**
+
+```bash
+# First, make sure you're in the correct directory
+pwd
+# Should show: /home/watchparty/apps/watchparty
+
+# If not in the correct directory, navigate there
+cd /home/watchparty/apps/watchparty
+
+# Check if database/schema.sql exists
+ls -la database/schema.sql
+# Should show: database/schema.sql
+
+# Grant proper permissions to the database user
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE boltzy_production TO boltzy_user;"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON SCHEMA public TO boltzy_user;"
+sudo -u postgres psql -c "ALTER USER boltzy_user CREATEDB;"
+
+# Apply database schema
+psql -h localhost -U boltzy_user -d boltzy_production -f database/schema.sql
+
+# Verify tables were created
+psql -h localhost -U boltzy_user -d boltzy_production -c "\dt"
+# Should show: users, rooms, room_participants, etc.
+
+# Test database connection
+psql -h localhost -U boltzy_user -d boltzy_production -c "SELECT version();"
+# Should show PostgreSQL version
+```
+
+> **🚨 QUICK FIX: If you get "No such file or directory" error:**
+> 
+> ```bash
+> # Check if you're in the right directory
+> pwd
+> 
+> # If you're in /home/surtiakhtar1, navigate to the correct directory
+> cd /home/watchparty/apps/watchparty
+> 
+> # If the directory doesn't exist, clone the repository first
+> mkdir -p /home/watchparty/apps
+> cd /home/watchparty/apps
+> git clone https://github.com/dilippurohit3/watchparty.git
+> cd watchparty
+> 
+> # Now apply the database schema
+> psql -h localhost -U boltzy_user -d boltzy_production -f database/schema.sql
+> ```
+
+> **🚨 IMMEDIATE FIX: For persistent permission errors:**
+> 
+> ```bash
+> # Drop and recreate the user with proper permissions
+> sudo -u postgres psql -c "DROP USER IF EXISTS boltzy_user;"
+> sudo -u postgres psql -c "CREATE USER boltzy_user WITH PASSWORD 'boltzy_secure_password_2024' CREATEDB CREATEROLE;"
+> sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE boltzy_production TO boltzy_user;"
+> sudo -u postgres psql -c "ALTER DATABASE boltzy_production OWNER TO boltzy_user;"
+> 
+> # Connect to the database and grant schema permissions
+> sudo -u postgres psql -d boltzy_production -c "GRANT ALL PRIVILEGES ON SCHEMA public TO boltzy_user;"
+> sudo -u postgres psql -d boltzy_production -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO boltzy_user;"
+> sudo -u postgres psql -d boltzy_production -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO boltzy_user;"
+> 
+> # Now try applying the schema
+> psql -h localhost -U boltzy_user -d boltzy_production -f database/schema.sql
+> ```
+
+### Step 5.4: Create Admin User in Database
 
 ```bash
 # Connect to database
@@ -1066,6 +1173,93 @@ sudo systemctl enable postgresql
 
 # Test database connection
 psql -h localhost -U boltzy_user -d boltzy_production -c "SELECT 1;"
+```
+
+#### Issue 2.1: "relation does not exist" errors
+```bash
+# This means the database schema hasn't been applied yet
+# Apply the database schema first
+psql -h localhost -U boltzy_user -d boltzy_production -f database/schema.sql
+
+# Verify tables were created
+psql -h localhost -U boltzy_user -d boltzy_production -c "\dt"
+# Should show: users, rooms, room_participants, etc.
+
+# Now you can create admin users
+psql -h localhost -U boltzy_user -d boltzy_production -c "INSERT INTO users (firebase_uid, username, email, avatar_url, is_online, created_at) VALUES ('your-firebase-uid', 'admin', 'admin@yourdomain.com', NULL, true, NOW());"
+```
+
+#### Issue 2.2: "No such file or directory" for database/schema.sql
+```bash
+# This means you're not in the correct directory or repository not cloned
+# Check current directory
+pwd
+# Should show: /home/watchparty/apps/watchparty
+
+# If not in correct directory, navigate there
+cd /home/watchparty/apps/watchparty
+
+# Check if repository is cloned
+ls -la
+# Should show: frontend, backend, database, etc.
+
+# If repository not cloned, clone it first
+git clone https://github.com/dilippurohit3/watchparty.git
+cd watchparty
+
+# Now apply database schema
+psql -h localhost -U boltzy_user -d boltzy_production -f database/schema.sql
+```
+
+#### Issue 2.3: "permission denied for schema public" errors
+```bash
+# This means the database user doesn't have proper permissions
+# First, connect to the database and grant permissions properly
+sudo -u postgres psql -d boltzy_production -c "GRANT ALL PRIVILEGES ON SCHEMA public TO boltzy_user;"
+sudo -u postgres psql -d boltzy_production -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO boltzy_user;"
+sudo -u postgres psql -d boltzy_production -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO boltzy_user;"
+sudo -u postgres psql -d boltzy_production -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO boltzy_user;"
+sudo -u postgres psql -d boltzy_production -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO boltzy_user;"
+
+# Make boltzy_user the owner of the database
+sudo -u postgres psql -c "ALTER DATABASE boltzy_production OWNER TO boltzy_user;"
+
+# Now try applying the schema again
+psql -h localhost -U boltzy_user -d boltzy_production -f database/schema.sql
+```
+
+#### Issue 2.3.1: Still getting permission errors after grants
+```bash
+# If you're still getting permission errors, try this comprehensive fix
+# Drop and recreate the user with proper permissions
+sudo -u postgres psql -c "DROP USER IF EXISTS boltzy_user;"
+sudo -u postgres psql -c "CREATE USER boltzy_user WITH PASSWORD 'boltzy_secure_password_2024' CREATEDB CREATEROLE;"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE boltzy_production TO boltzy_user;"
+sudo -u postgres psql -c "ALTER DATABASE boltzy_production OWNER TO boltzy_user;"
+
+# Connect to the database and grant schema permissions
+sudo -u postgres psql -d boltzy_production -c "GRANT ALL PRIVILEGES ON SCHEMA public TO boltzy_user;"
+sudo -u postgres psql -d boltzy_production -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO boltzy_user;"
+sudo -u postgres psql -d boltzy_production -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO boltzy_user;"
+
+# Now try applying the schema
+psql -h localhost -U boltzy_user -d boltzy_production -f database/schema.sql
+```
+
+#### Issue 2.4: "syntax error at or near current_time" errors
+```bash
+# This means there's a reserved keyword conflict in the schema
+# The schema has been fixed to use 'current_video_time' instead of 'current_time'
+# If you still get this error, you may need to update the schema file
+# Check if the schema file has been updated
+grep -n "current_time" database/schema.sql
+# Should show no results (the file has been fixed)
+
+# If it still shows current_time, the file needs to be updated
+# You can manually fix it or re-clone the repository
+git pull origin main
+# Then try applying the schema again
+psql -h localhost -U boltzy_user -d boltzy_production -f database/schema.sql
 ```
 
 #### Issue 3: Redis connection errors

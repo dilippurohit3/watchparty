@@ -63,19 +63,19 @@ export const createRateLimit = (windowMs: number, max: number, message?: string)
 export const websocketRateLimit = (maxConnections: number = 10) => {
   const connections = new Map<string, number>();
   
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const ip = req.ip || req.connection.remoteAddress || 'unknown';
+  return (socket: any, next: any): void => {
+    const ip = socket.handshake.address || socket.conn.remoteAddress || 'unknown';
     const currentConnections = connections.get(ip) || 0;
     
     if (currentConnections >= maxConnections) {
       logger.warn('WebSocket rate limit exceeded', { ip, connections: currentConnections });
-      throw new AppError('Too many WebSocket connections', 429, 'WEBSOCKET_RATE_LIMIT');
+      return next(new Error('Too many WebSocket connections'));
     }
     
     connections.set(ip, currentConnections + 1);
     
     // Clean up after connection closes
-    req.on('close', () => {
+    socket.on('disconnect', () => {
       const current = connections.get(ip) || 0;
       if (current <= 1) {
         connections.delete(ip);
