@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: rave-postgres
+    environment:
+      POSTGRES_DB: boltzy_production
+      POSTGRES_USER: boltzy_user
+      POSTGRES_PASSWORD: boltzy_secure_password_2024
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - rave-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: rave-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - rave-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: rave-backend
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: boltzy_production
+      DB_USER: boltzy_user
+      DB_PASSWORD: boltzy_secure_password_2024
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # JWT configuration removed - using Firebase authentication only
+      FRONTEND_URL: http://localhost:3000
+      FIREBASE_PROJECT_ID: your-firebase-project-id
+      FIREBASE_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\nyour-private-key\n-----END PRIVATE KEY-----\n"
+      FIREBASE_CLIENT_EMAIL: firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.com
+      FIREBASE_AUTH_DOMAIN: your-project.firebaseapp.com
+      FIREBASE_API_KEY: your-api-key
+      FIREBASE_STORAGE_BUCKET: your-project.appspot.com
+      FIREBASE_MESSAGING_SENDER_ID: your-sender-id
+      FIREBASE_APP_ID: your-app-id
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - rave-network
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: rave-frontend
+    environment:
+      VITE_API_URL: http://localhost:8080
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - rave-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: rave-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - rave-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  rave-network:
+    driver: bridge

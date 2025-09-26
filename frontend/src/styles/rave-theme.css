@@ -1,0 +1,329 @@
+/* Rave Clone - Dark Theme with Neon Accents */
+
+:root {
+  /* Dark Theme Colors */
+  --rave-bg-primary: #0a0a0a;
+  --rave-bg-secondary: #1a1a1a;
+  --rave-bg-tertiary: #2a2a2a;
+  --rave-bg-card: rgba(26, 26, 26, 0.8);
+  
+  /* Neon Accent Colors */
+  --rave-neon-pink: #ff0080;
+  --rave-neon-blue: #00ffff;
+  --rave-neon-green: #00ff00;
+  --rave-neon-purple: #8000ff;
+  --rave-neon-yellow: #ffff00;
+  
+  /* Text Colors */
+  --rave-text-primary: #ffffff;
+  --rave-text-secondary: #b0b0b0;
+  --rave-text-muted: #808080;
+  
+  /* Glassmorphism */
+  --rave-glass-bg: rgba(255, 255, 255, 0.05);
+  --rave-glass-border: rgba(255, 255, 255, 0.1);
+  --rave-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  
+  /* Gradients */
+  --rave-gradient-primary: linear-gradient(135deg, #ff0080, #8000ff);
+  --rave-gradient-secondary: linear-gradient(135deg, #00ffff, #00ff00);
+  --rave-gradient-accent: linear-gradient(135deg, #ffff00, #ff0080);
+}
+
+/* Base Styles */
+.rave-theme {
+  background: var(--rave-bg-primary);
+  color: var(--rave-text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Glassmorphism Cards */
+.rave-glass {
+  background: var(--rave-glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--rave-glass-border);
+  border-radius: 24px;
+  box-shadow: var(--rave-glass-shadow);
+}
+
+/* Neon Buttons */
+.rave-btn-neon {
+  background: var(--rave-gradient-primary);
+  border: none;
+  border-radius: 16px;
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.rave-btn-neon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 0, 128, 0.4);
+}
+
+.rave-btn-neon:active {
+  transform: translateY(0);
+}
+
+/* Neon Text */
+.rave-text-neon {
+  background: var(--rave-gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+/* Reaction Animations */
+@keyframes rave-heart-fall {
+  0% {
+    transform: translateY(-100px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes rave-confetti {
+  0% {
+    transform: translateY(-100px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.rave-heart-animation {
+  animation: rave-heart-fall 3s ease-out forwards;
+}
+
+.rave-confetti-animation {
+  animation: rave-confetti 4s ease-out forwards;
+}
+
+/* Floating Elements */
+.rave-floating {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Bottom Tab Bar */
+.rave-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--rave-bg-card);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--rave-glass-border);
+  padding: 8px 0 24px 0;
+  z-index: 100;
+}
+
+.rave-tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  color: var(--rave-text-muted);
+}
+
+.rave-tab-item.active {
+  color: var(--rave-neon-pink);
+  background: var(--rave-glass-bg);
+}
+
+.rave-tab-item:hover {
+  color: var(--rave-text-primary);
+  background: var(--rave-glass-bg);
+}
+
+/* Room Video Overlay */
+.rave-video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  pointer-events: none;
+}
+
+.rave-video-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.7) 50%,
+    transparent 100%
+  );
+  pointer-events: auto;
+}
+
+/* Mini Chat */
+.rave-mini-chat {
+  position: absolute;
+  right: 16px;
+  bottom: 80px;
+  width: 300px;
+  max-height: 200px;
+  background: var(--rave-bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--rave-glass-border);
+  border-radius: 16px;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+.rave-mini-chat-message {
+  padding: 8px 12px;
+  margin: 4px 0;
+  background: var(--rave-glass-bg);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Participants List */
+.rave-participants {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 200px;
+}
+
+.rave-participant-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--rave-neon-pink);
+  background: var(--rave-gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.rave-participant-avatar.dj {
+  border-color: var(--rave-neon-yellow);
+  box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+}
+
+/* DJ Controls */
+.rave-dj-controls {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: var(--rave-bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--rave-glass-border);
+  border-radius: 16px;
+  padding: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.rave-dj-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--rave-gradient-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.rave-dj-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(255, 0, 128, 0.4);
+}
+
+/* Reaction Overlay */
+.rave-reaction-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.rave-reaction-item {
+  position: absolute;
+  font-size: 24px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .rave-mini-chat {
+    width: calc(100vw - 32px);
+    right: 16px;
+    left: 16px;
+  }
+  
+  .rave-participants {
+    max-width: calc(100vw - 32px);
+    flex-wrap: wrap;
+  }
+  
+  .rave-dj-controls {
+    flex-wrap: wrap;
+  }
+}
+
+/* PWA Styles */
+.rave-pwa {
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Custom Scrollbar */
+.rave-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.rave-scrollbar::-webkit-scrollbar-track {
+  background: var(--rave-bg-secondary);
+  border-radius: 3px;
+}
+
+.rave-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--rave-gradient-primary);
+  border-radius: 3px;
+}
+
+.rave-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--rave-neon-pink);
+}
